@@ -1,49 +1,63 @@
 import numpy as np
 import cv2
-import serial
+import time
 
-center_tolerance = 5; 
- 
+# Initialize the HOG descriptor with the default people detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-cv2.startWindowThread()
+# Open webcam
 cap = cv2.VideoCapture(0)
 
-while(True):
+THRESHOLD_HEIGHT = 170
+SUCCESS_DURATION = 1
+
+while True:
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (140, 140))
-    boxes, weights = hog.detectMultiScale(frame, winStride=(1,1), scale = 1.05)
-    boxes = np.array([[x, y, x + w, y + h] for (x, y, w, h) in boxes])
-    centers = []
-    for box in boxes:
-        center_x = ((box[2]-box[0])/2)+box[0]
-        x_pos_rel_center = (center_x-70)
-        dist_to_center_x = abs(x_pos_rel_center)
-        centers.append({'box': box, 'x_pos_rel_center': x_pos_rel_center, 'dist_to_center_x':dist_to_center_x})    
-    if len(centers) > 0:
-        sorted_boxes = sorted(centers, key=lambda i: i['dist_to_center_x'])
-        center_box = sorted_boxes[0]['box']
-        for box in range(len(sorted_boxes)):
-            if box == 0:
-                cv2.rectangle(frame, (sorted_boxes[box]['box'][0],sorted_boxes[box]['box'][1]), (sorted_boxes[box]['box'][2],sorted_boxes[box]['box'][3]), (0,255, 0), 2)
-            else:
-                cv2.rectangle(frame, (sorted_boxes[box]['box'][0],sorted_boxes[box]['box'][1]), (sorted_boxes[box]['box'][2],sorted_boxes[box]['box'][3]),(0,0,255),2)
-        Center_box_pos_x = sorted_boxes[0]['x_pos_rel_center']  
-        if -center_tolerance <= Center_box_pos_x <= center_tolerance:
-            print("center")
-        elif Center_box_pos_x >= center_tolerance:
-            print("right")
-        elif Center_box_pos_x <= -center_tolerance:
-            print("left")
-        print(str(Center_box_pos_x))
+    if not ret:
+        print("Error: Unable to access the webcam.")
+        break
+
+    frame = cv2.resize(frame, (200, 200))
+
+    boxes, weights = hog.detectMultiScale(frame, winStride=(8, 8), scale=1.05)
+    
+    if len(boxes) > 0:
+        boxes = np.array([[x, y, x + w, y + h] for (x, y, w, h) in boxes])
+        centers = [((box[2] - box[0]) / 2 + box[0] - 70, box) for box in boxes]
+        sorted_boxes = sorted(centers, key=lambda c: abs(c[0]))
+        center_box = sorted_boxes[0][1]
+        
+        height = center_box[3] - center_box[1]
+        if height > THRESHOLD_HEIGHT:
+            if start_time is None:
+                start_time = time.time()
+            elif time.time() - start_time >= SUCCESS_DURATION and not success_printed:
+                print("success") 
+                success_printed = True
+
+            cv2.rectangle(frame, (center_box[0], center_box[1]), (center_box[2], center_box[3]), (0, 255, 0), 2)
+
+            print("Detected: Height =", height)
+        else:
+            start_time = None
+            print("Detected: Height =", height)
+    
+
+        
+            
     else:
-        print("nothing detected")
-    frame = cv2.resize(frame,(720,720))
-    cv2.imshow("frame",frame)
+        start_time = None
+        success_printed = False
+        print("Nothing detected")
+
+    # Resize and display the frame only if a person is detected
+    frame = cv2.resize(frame, (720, 720))
+    cv2.imshow("frame", frame)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+# Release the webcam and close OpenCV windows
 cap.release()
 cv2.destroyAllWindows()
-cv2.waitKey(1)
