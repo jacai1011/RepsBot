@@ -1,5 +1,5 @@
 # RepsCounter
-Software for Raspberry Pi 4B used to automate track gym reps and posture for detected exercise using OpenCV. 
+Software for Raspberry Pi 4B used to automate track exercise reps and movement for detected exercise using OpenCV. 
 
 OpenCV required packages:
 
