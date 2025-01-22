@@ -2,7 +2,7 @@
 Software for Raspberry Pi 4B used to automate track gym reps and posture for detected exercise using OpenCV.
 
 ## HOG Tracker
-Uses HOG (Histogram of oriented gradients) to track reps based on whether person is in detected frame or not. Only works on upright/standing exercises and counts based on detection of person based on whether they are standing or performing movement. Unreliable due to limitations of RPI4B and limited accuracy along with the limitations of the HOG itself being unable to track precise movements.
+Uses HOG (Histogram of oriented gradients) to track reps based on whether person is in detected frame or not. Only works on upright/standing exercises and counts based on detection of person based on whether they are standing or performing movement. Unreliable due to limitations of RPI4B and limited accuracy along with the limitations of the HOG itself being unable to track precise movements with given input.
 
 ## TFlow Tracker
 Uses TensorFlow and MobileNet model to track precise movement of person. Able to map basic keypoints of a human frame output into a live stream. Limited to 257x257 due to RPI4B capability however tracks movement with reasonable reliability and accuracy. Uses the Google Posenet model:
