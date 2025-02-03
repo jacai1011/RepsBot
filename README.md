@@ -20,7 +20,7 @@ Uses TensorFlow and MobileNet model to track precise movement of person. Able to
 
 wget https://storage.googleapis.com/download.tensorflow.org/models/tflite/posenet_mobilenet_v1_100_257x257_multi_kpt_stripped.tflite
 
-Math for keypoint calculations based on:
+Formulas for keypoint calculations based on:
 
 https://ecd1012.medium.com/pose-estimation-on-the-raspberry-pi-4-83a02164eb8e
 
