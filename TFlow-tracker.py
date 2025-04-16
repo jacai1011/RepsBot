@@ -137,7 +137,19 @@ try:
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         # Deadlift
-        de_relevant_pts = []
+        shoulder_indices = [5, 6]
+        hip_indices = [11, 12]
+
+        shoulders_detected = all(i not in drop_pts for i in shoulder_indices)
+        hips_detected = all(i not in drop_pts for i in hip_indices)
+
+        if hips_detected:
+            if not shoulders_detected:
+                cv2.putText(frame_resized, "DEADLIFT POSITION", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+            else:
+                cv2.putText(frame_resized, "STANDING", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         
         
