@@ -1,3 +1,5 @@
+
+
 import os
 import argparse
 import cv2
@@ -50,9 +52,6 @@ height = input_details[0]['shape'][1]
 width = input_details[0]['shape'][2]
 output_stride = 32
 
-# Below coords calculation functions based off
-# https://github.com/ecd1012/rpi_pose_estimation/blob/main/run_pose_estimation.py
-# edited to work with current setup
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -83,7 +82,8 @@ try:
 
     videostream = VideoStream(resolution=(257, 257), framerate=30).start()
     time.sleep(1)
-
+    sp_reference_height = None
+    sq_reference_height = None
     while True:
         frame1 = videostream.read()
         frame_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -97,11 +97,52 @@ try:
         coords = sigmoid_and_argmax2d(output_details, 0.5)
         drop_pts = list(np.unique(np.where(coords == 0)[0]))
         keypoint_positions = coords * output_stride
+        
+        # Draw all valid keypoints - for debugging purposes
         for i, pos in enumerate(keypoint_positions):
             if i not in drop_pts:
                 cv2.circle(frame_resized, (int(pos[1]), int(pos[0])), 2, (0, 255, 0), 2)
 
+        # Squat
+        sq_relevant_pts = [5, 6, 11, 12]
+        if all(i not in drop_pts for i in sq_relevant_pts):
+            avg_y = np.mean([keypoint_positions[i][0] for i in sq_relevant_pts])
+
+            if sq_reference_height is None:
+                sq_reference_height = avg_y  # baseline read
+            else:
+                drop = avg_y - sq_reference_height
+                print(drop)
+                if drop > 30: # threshold 
+                    cv2.putText(frame_resized, "SQUAT", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                else:
+                    cv2.putText(frame_resized, "STANDING", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
+        # Shoulder Press
+        sp_relevant_pts = [5, 6, 7, 8, 9, 10]
+        if all(i not in drop_pts for i in sp_relevant_pts):
+            avg_y = np.mean([keypoint_positions[i][0] for i in sp_relevant_pts])
+            if sp_reference_height is None:
+                sp_reference_height = avg_y
+            else:
+                drop = avg_y - sp_reference_height
+                print(drop)
+                if drop < -10:
+                    cv2.putText(frame_resized, "PRESS", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                else:
+                    cv2.putText(frame_resized, "STANDING", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
+        # Deadlift
+        de_relevant_pts = []
+        
+        
+        
         frame_resized = draw_lines(keypoint_positions, frame_resized, drop_pts)
+        
 
         cv2.imshow('Keypoints Detection', frame_resized)
         if cv2.waitKey(1) == ord('q'):
