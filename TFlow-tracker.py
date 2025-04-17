@@ -168,8 +168,22 @@ try:
                 else:
                     cv2.putText(frame_resized, "STANDING", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        
-        
+
+        # Bent Over Row
+        br_relevant_pts = [5, 6, 7, 8, 9, 10]
+        if all(i not in drop_pts for i in br_relevant_pts):
+            avg_y = np.mean([keypoint_positions[i][0] for i in br_relevant_pts])
+            if br_reference_height is None:
+                br_reference_height = avg_y
+            else:
+                drop = avg_y - br_reference_height
+                print(drop)
+                if drop < -5:
+                    cv2.putText(frame_resized, "ROW", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                else:
+                    cv2.putText(frame_resized, "STANDING", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         frame_resized = draw_lines(keypoint_positions, frame_resized, drop_pts)
         
