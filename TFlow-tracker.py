@@ -84,6 +84,7 @@ try:
     time.sleep(1)
     sp_reference_height = None
     sq_reference_height = None
+    rd_reference_height = None
     while True:
         frame1 = videostream.read()
         frame_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -150,6 +151,23 @@ try:
             else:
                 cv2.putText(frame_resized, "STANDING", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        # Romanian Deadlift
+        rd_relevant_pts = [5, 6, 11, 12]
+        if all(i not in drop_pts for i in rd_relevant_pts):
+            avg_y = np.mean([keypoint_positions[i][0] for i in rd_relevant_pts])
+
+            if rd_reference_height is None:
+                rd_reference_height = avg_y
+            else:
+                drop = avg_y - rd_reference_height
+                print(drop)
+                if drop > 10:
+                    cv2.putText(frame_resized, "LIFT", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                else:
+                    cv2.putText(frame_resized, "STANDING", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         
         
