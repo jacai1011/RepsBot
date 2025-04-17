@@ -138,14 +138,14 @@ try:
         
         # Deadlift
         shoulder_indices = [5, 6]
-        hip_indices = [11, 12]
+        knee_indices = [13, 14]
 
         shoulders_detected = all(i not in drop_pts for i in shoulder_indices)
-        hips_detected = all(i not in drop_pts for i in hip_indices)
+        knees_detected = all(i not in drop_pts for i in knee_indices)
 
-        if hips_detected:
+        if knees_detected:
             if not shoulders_detected:
-                cv2.putText(frame_resized, "DEADLIFT POSITION", (10, 60),
+                cv2.putText(frame_resized, "DEADLIFT", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
             else:
                 cv2.putText(frame_resized, "STANDING", (10, 60),
