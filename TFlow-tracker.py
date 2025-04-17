@@ -121,7 +121,7 @@ try:
                     cv2.putText(frame_resized, "STANDING", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
-        # Shoulder Press
+        # Shoulder Press / Lat Pulldown
         sp_relevant_pts = [5, 6, 7, 8, 9, 10]
         if all(i not in drop_pts for i in sp_relevant_pts):
             avg_y = np.mean([keypoint_positions[i][0] for i in sp_relevant_pts])
