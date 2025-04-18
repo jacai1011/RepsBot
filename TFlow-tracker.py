@@ -158,7 +158,7 @@ try:
                 if frame_count > sp_threshold_frames:
                     sp_count += 1
                     frame_count = 0
-                cv2.putText(frame_resized, "DEADLIFT", (10, 60),
+                cv2.putText(frame_resized, "PRESS", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
                 
             else:
