@@ -85,6 +85,10 @@ try:
     sp_reference_height = None
     sq_reference_height = None
     rd_reference_height = None
+    de_frame_count = 0
+    de_threshold_frames = 7
+    rd_count = 0
+    de_count = 0
     while True:
         frame1 = videostream.read()
         frame_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -145,29 +149,19 @@ try:
         knees_detected = all(i not in drop_pts for i in knee_indices)
 
         if knees_detected:
+            print(de_count)
+            de_frame_count += 1
             if not shoulders_detected:
+                if de_frame_count > de_threshold_frames:
+                    de_count += 1
+                de_frame_count = 0
                 cv2.putText(frame_resized, "DEADLIFT", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                
             else:
+                
                 cv2.putText(frame_resized, "STANDING", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        # Romanian Deadlift
-        rd_relevant_pts = [5, 6, 11, 12]
-        if all(i not in drop_pts for i in rd_relevant_pts):
-            avg_y = np.mean([keypoint_positions[i][0] for i in rd_relevant_pts])
-
-            if rd_reference_height is None:
-                rd_reference_height = avg_y
-            else:
-                drop = avg_y - rd_reference_height
-                print(drop)
-                if drop > 10:
-                    cv2.putText(frame_resized, "LIFT", (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                else:
-                    cv2.putText(frame_resized, "STANDING", (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         # Bent Over Row
         br_relevant_pts = [5, 6, 7, 8, 9, 10]
