@@ -85,10 +85,12 @@ try:
     sp_reference_height = None
     sq_reference_height = None
     rd_reference_height = None
-    de_frame_count = 0
+    frame_count = 0
     de_threshold_frames = 7
+    sp_threshold_frames = 4
     de_count = 0
     sq_count = 0
+    sp_count = 0
     while True:
         frame1 = videostream.read()
         frame_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -129,7 +131,7 @@ try:
                     cv2.putText(frame_resized, "STANDING", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
-        # Shoulder Press / Lat Pulldown
+        # Lat Pulldown
         sp_relevant_pts = [5, 6, 7, 8, 9, 10]
         if all(i not in drop_pts for i in sp_relevant_pts):
             avg_y = np.mean([keypoint_positions[i][0] for i in sp_relevant_pts])
@@ -144,6 +146,29 @@ try:
                 else:
                     cv2.putText(frame_resized, "STANDING", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        # Shoulder Press
+        shoulder_indices = [5, 6]
+        knee_indices = [13, 14]
+
+        shoulders_detected = all(i not in drop_pts for i in shoulder_indices)
+        knees_detected = all(i not in drop_pts for i in knee_indices)
+
+        if knees_detected:
+            print(sp_count)
+            sp_frame_count += 1
+            if not shoulders_detected:
+                if sp_frame_count > sp_threshold_frames:
+                    sp_count += 1
+                    sp_frame_count = 0
+                cv2.putText(frame_resized, "DEADLIFT", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                
+            else:
+                cv2.putText(frame_resized, "STANDING", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
+        frame_resized = draw_lines(keypoint_positions, frame_resized, drop_pts)
         
         # Deadlift / Romanian Deadlift
         shoulder_indices = [5, 6]
