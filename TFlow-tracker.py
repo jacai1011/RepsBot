@@ -87,8 +87,8 @@ try:
     rd_reference_height = None
     de_frame_count = 0
     de_threshold_frames = 7
-    rd_count = 0
     de_count = 0
+    sq_count = 0
     while True:
         frame1 = videostream.read()
         frame_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -117,8 +117,12 @@ try:
                 sq_reference_height = avg_y  # baseline read
             else:
                 drop = avg_y - sq_reference_height
-                print(drop)
+                sq_frame_count += 1
+                print(count)
                 if drop > 30: # threshold 
+                    if sq_frame_count > de_threshold_frames:
+                        sq_count += 1
+                        sq_frame_count = 0
                     cv2.putText(frame_resized, "SQUAT", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 else:
