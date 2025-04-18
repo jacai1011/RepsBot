@@ -82,9 +82,7 @@ try:
 
     videostream = VideoStream(resolution=(257, 257), framerate=30).start()
     time.sleep(1)
-    sp_reference_height = None
-    sq_reference_height = None
-    rd_reference_height = None
+    reference_height = None
     frame_count = 0
     de_threshold_frames = 7
     sp_threshold_frames = 4
@@ -115,16 +113,15 @@ try:
         if all(i not in drop_pts for i in sq_relevant_pts):
             avg_y = np.mean([keypoint_positions[i][0] for i in sq_relevant_pts])
 
-            if sq_reference_height is None:
-                sq_reference_height = avg_y  # baseline read
+            if reference_height is None:
+                reference_height = avg_y  # baseline read
             else:
-                drop = avg_y - sq_reference_height
-                sq_frame_count += 1
-                print(count)
+                drop = avg_y - reference_height
+                frame_count += 1
                 if drop > 30: # threshold 
-                    if sq_frame_count > de_threshold_frames:
+                    if frame_count > de_threshold_frames:
                         sq_count += 1
-                        sq_frame_count = 0
+                        frame_count = 0
                     cv2.putText(frame_resized, "SQUAT", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 else:
@@ -135,10 +132,10 @@ try:
         sp_relevant_pts = [5, 6, 7, 8, 9, 10]
         if all(i not in drop_pts for i in sp_relevant_pts):
             avg_y = np.mean([keypoint_positions[i][0] for i in sp_relevant_pts])
-            if sp_reference_height is None:
-                sp_reference_height = avg_y
+            if reference_height is None:
+                reference_height = avg_y
             else:
-                drop = avg_y - sp_reference_height
+                drop = avg_y - reference_height
                 print(drop)
                 if drop < -10:
                     cv2.putText(frame_resized, "PRESS", (10, 30),
@@ -156,11 +153,11 @@ try:
 
         if knees_detected:
             print(sp_count)
-            sp_frame_count += 1
+            frame_count += 1
             if not shoulders_detected:
-                if sp_frame_count > sp_threshold_frames:
+                if frame_count > sp_threshold_frames:
                     sp_count += 1
-                    sp_frame_count = 0
+                    frame_count = 0
                 cv2.putText(frame_resized, "DEADLIFT", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
                 
@@ -179,11 +176,11 @@ try:
 
         if knees_detected:
             print(de_count)
-            de_frame_count += 1
+            frame_count += 1
             if not shoulders_detected:
-                if de_frame_count > de_threshold_frames:
+                if frame_count > de_threshold_frames:
                     de_count += 1
-                de_frame_count = 0
+                frame_count = 0
                 cv2.putText(frame_resized, "DEADLIFT", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
                 
@@ -196,10 +193,10 @@ try:
         br_relevant_pts = [5, 6, 7, 8, 9, 10]
         if all(i not in drop_pts for i in br_relevant_pts):
             avg_y = np.mean([keypoint_positions[i][0] for i in br_relevant_pts])
-            if br_reference_height is None:
-                br_reference_height = avg_y
+            if reference_height is None:
+                reference_height = avg_y
             else:
-                drop = avg_y - br_reference_height
+                drop = avg_y - reference_height
                 print(drop)
                 if drop < -5:
                     cv2.putText(frame_resized, "ROW", (10, 30),
