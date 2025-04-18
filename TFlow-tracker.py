@@ -137,7 +137,7 @@ try:
                     cv2.putText(frame_resized, "STANDING", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
-        # Deadlift
+        # Deadlift / Romanian Deadlift
         shoulder_indices = [5, 6]
         knee_indices = [13, 14]
 
